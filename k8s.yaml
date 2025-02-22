@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-project
+  template:
+    metadata:
+      labels:
+        app: simple-project
+    spec:
+      containers:
+        - name: simple-project
+          image: harshyadav02/simple-project:latest  # Ensure the image is built for Minikube or a registry
+          ports:
+            - containerPort: 8081
+          imagePullPolicy: IfNotPresent
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-project-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: simple-project
+  ports:
+    - protocol: TCP
+      port: 8081  # External port (accessible via Minikube)
+      targetPort: 8081  # Port inside the container
+
