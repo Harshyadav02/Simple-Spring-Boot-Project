@@ -1,13 +1,15 @@
-# Build stage
-FROM maven:3.9.2-eclipse-temurin-21-alpine as build
-WORKDIR /app
-COPY pom.xml .
-COPY src ./src
-RUN mvn clean package -DskipTests
+# Use an official OpenJDK 21 runtime as a parent image
+FROM eclipse-temurin:21-jdk
 
-# Run stage
-FROM eclipse-temurin:21-jre-alpine
+# Set the working directory inside the container
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+
+# Copy the built JAR file from the Maven build stage to the container
+COPY target/*.jar app.jar
+
+# Expose the application port
 EXPOSE 8081
+
+# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
