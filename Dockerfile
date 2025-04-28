@@ -1,15 +1,31 @@
-# Use an official OpenJDK 21 runtime as a parent image
-FROM eclipse-temurin:21-jdk
+# Build stage
 
-# Set the working directory inside the container
+FROM maven:3.9.6-eclipse-temurin-21-alpine as build
+
 WORKDIR /app
 
-# Copy the built JAR file from the Maven build stage to the container
-COPY target/*.jar app.jar
+COPY  pom.xml .
 
-# Expose the application port
+COPY src ./src
+
+RUN mvn clean package -DskipTests
+
+
+
+# Runtime stage
+FROM eclipse-temurin:21-jre-alpine
+
+LABEL maintainer="harsh-yadav-docker" version="version:0.1"
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+RUN adduser -D -h /home/harshyadav harshyadav
+
+USER harshyadav
+
 EXPOSE 8081
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.jar"]
 
